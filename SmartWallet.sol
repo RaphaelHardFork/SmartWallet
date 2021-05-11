@@ -7,6 +7,7 @@ pragma solidity ^0.8.0;
 import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/utils/Address.sol";
 import "./Ownable.sol";
 
+// Deployed at 0x74d2d2a340A15811b9D2F076f6b8834a343e2D94 on Goerli
 contract SmartWallet {
     // library usage
     using Address for address payable;
@@ -217,5 +218,3 @@ contract SmartWallet {
         return (amount * percentage_) / 100;
     }
 }
-
-// ERREUR sur exo 4 :The transaction has been reverted to the initial state. Note: The called function should be payable if you send value and the value you send should be less than your current balance. Debug the transaction to get more information.
