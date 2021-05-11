@@ -12,13 +12,14 @@ contract SmartWallet {
     using Address for address payable;
 
     // State variables
-    mapping(address => uint256) private _balances;
+    address private _owner;
     uint256 private _percentage;
     uint256 private _profit;
     uint256 private _totalProfit;
+    mapping(address => uint256) private _balances;
     mapping(address => uint256) private _depositTime;
-    address private _owner;
     mapping(address => bool) private _whiteList;
+    mapping(address => mapping(address => uint256)) private _allowances;
 
     // Events
     event Deposited(address indexed sender, uint256 amount, uint256 epochTime);
@@ -28,6 +29,11 @@ contract SmartWallet {
         address indexed recipient,
         uint256 amount,
         uint256 epochTime
+    );
+    event Approval(
+        address indexed owner,
+        address indexed sender,
+        uint256 amount
     );
 
     // constructor
@@ -115,6 +121,26 @@ contract SmartWallet {
         _whiteList[account] = !_whiteList[account];
     }
 
+    function approve(address account, uint256 amount) public {
+        _allowances[msg.sender][account] = amount;
+        emit Approval(msg.sender, account, amount);
+    }
+
+    function transferFrom(
+        address from,
+        address to,
+        uint256 amount
+    ) public {
+        require(
+            _allowances[from][msg.sender] >= amount,
+            "SmartWallet: You don't have any funds allowed anymore."
+        );
+        _allowances[from][msg.sender] -= amount;
+        _balances[from] -= amount;
+        _balances[to] += amount;
+        emit Transfered(from, to, amount, block.timestamp);
+    }
+
     function balanceOf(address account) public view returns (uint256) {
         return _balances[account];
     }
@@ -146,6 +172,14 @@ contract SmartWallet {
 
     function isOnWhiteList(address account) public view returns (bool) {
         return _whiteList[account];
+    }
+
+    function allowance(address owner_, address spender)
+        public
+        view
+        returns (uint256)
+    {
+        return _allowances[owner_][spender];
     }
 
     function _deposit(address sender, uint256 amount) private {
@@ -183,3 +217,5 @@ contract SmartWallet {
         return (amount * percentage_) / 100;
     }
 }
+
+// ERREUR sur exo 4 :The transaction has been reverted to the initial state. Note: The called function should be payable if you send value and the value you send should be less than your current balance. Debug the transaction to get more information.
